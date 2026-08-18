@@ -1,7 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import AlertList from '../../Components/AlertList';
+import PageHeader from '../../Components/PageHeader';
 import Sparkline from '../../Components/Sparkline';
 import AppLayout from '../../Layouts/AppLayout';
+import { formatReading, isOutOfRange } from '../../metrics';
 import type { AlertSummary, DeviceSummary } from '../../types';
 
 type Props = {
@@ -10,29 +12,39 @@ type Props = {
 };
 
 export default function OperationsDevice({ device, alerts }: Props) {
+    const current = device.latest_reading?.value;
+    const warn = current !== undefined && isOutOfRange(device.metric, current);
+
     return (
         <AppLayout>
             <Head title={device.name} />
-            <div className="mx-auto max-w-6xl px-6 py-12">
-                {device.site ? (
-                    <Link href={`/operations/sites/${device.site.slug}`} className="text-sm text-crimson hover:underline">
-                        {device.site.town}
-                    </Link>
-                ) : null}
-                <h1 className="mt-2 text-3xl font-bold text-ink">{device.name}</h1>
-                <p className="mt-2 text-ink/70">
-                    Last 7 days of {device.metric_label.toLowerCase()} readings
-                    {device.latest_reading
-                        ? ` · now ${device.latest_reading.value.toFixed(1)}${device.unit}`
-                        : ''}
-                </p>
+            <div className="mx-auto max-w-6xl px-6 py-10">
+                <PageHeader
+                    crumbs={[
+                        { label: 'Operations', href: '/operations' },
+                        {
+                            label: device.site?.town ?? 'Site',
+                            href: device.site ? `/operations/sites/${device.site.slug}` : undefined,
+                        },
+                        { label: device.metric_label },
+                    ]}
+                    title={device.name}
+                    description={`Last 7 days of ${device.metric_label.toLowerCase()} readings.`}
+                    aside={
+                        device.latest_reading ? (
+                            <p className={`text-3xl font-bold ${warn ? 'text-crimson' : 'text-ink'}`}>
+                                {formatReading(device.latest_reading.value, device.unit)}
+                            </p>
+                        ) : null
+                    }
+                />
 
-                <div className="mt-8 border border-ink/10 bg-white p-4">
-                    <Sparkline points={device.readings ?? []} />
+                <div className="rounded-sm border border-ink/10 bg-white p-5 shadow-sm">
+                    <Sparkline points={device.readings ?? []} unit={device.unit} />
                 </div>
 
-                <h2 className="mt-12 text-xl font-bold text-ink">Alerts</h2>
-                <div className="mt-4">
+                <h2 className="mt-12 text-lg font-bold text-ink">Alerts</h2>
+                <div className="mt-3">
                     <AlertList alerts={alerts} />
                 </div>
             </div>

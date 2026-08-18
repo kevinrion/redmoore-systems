@@ -1,6 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import AlertList from '../../Components/AlertList';
+import LinkedPanel from '../../Components/LinkedPanel';
+import PageHeader from '../../Components/PageHeader';
 import AppLayout from '../../Layouts/AppLayout';
+import { formatReading, isOutOfRange } from '../../metrics';
 import type { AlertSummary, SiteSummary } from '../../types';
 
 type Props = {
@@ -8,55 +11,65 @@ type Props = {
     alerts: AlertSummary[];
 };
 
-function readingLabel(site: SiteSummary, metric: string): string {
+function MetricCell({ site, metric, label }: { site: SiteSummary; metric: string; label: string }) {
     const device = site.devices?.find((item) => item.metric === metric);
-    if (!device?.latest_reading) {
-        return '—';
-    }
+    const value = device?.latest_reading?.value;
+    const warn = value !== undefined && isOutOfRange(metric, value);
 
-    return `${device.latest_reading.value.toFixed(1)}${device.unit}`;
+    return (
+        <div>
+            <dt className="text-ink/50">{label}</dt>
+            <dd className={`mt-0.5 font-bold ${warn ? 'text-crimson' : 'text-ink'}`}>
+                {device?.latest_reading && device.unit ? formatReading(device.latest_reading.value, device.unit) : '—'}
+            </dd>
+        </div>
+    );
 }
 
 export default function OperationsIndex({ sites, alerts }: Props) {
+    const openCount = alerts.filter((alert) => alert.is_open).length;
+
     return (
         <AppLayout>
             <Head title="Operations" />
-            <div className="mx-auto max-w-6xl px-6 py-12">
-                <h1 className="text-3xl font-bold text-ink">Operations</h1>
-                <p className="mt-2 max-w-2xl text-ink/80">
-                    Five UK sites. Each reports temperature, humidity, and how full the warehouse is. Acknowledge an
-                    alert to save that on the server.
-                </p>
+            <div className="mx-auto max-w-6xl px-6 py-10">
+                <PageHeader
+                    title="Operations"
+                    description="Five UK sites. Temperature, humidity, and fill level. Acknowledging an alert writes to the database."
+                    aside={
+                        <p className="rounded-sm bg-white px-3 py-2 text-sm text-ink/70 ring-1 ring-ink/10">
+                            <span className="font-bold text-crimson">{openCount}</span> open in this list
+                        </p>
+                    }
+                />
 
-                <div className="mt-10 grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                     {sites.map((site) => (
-                        <Link
-                            key={site.slug}
-                            href={`/operations/sites/${site.slug}`}
-                            className="border border-ink/10 bg-white p-5 hover:border-crimson"
-                        >
-                            <p className="text-sm text-gold">{site.town}</p>
-                            <h2 className="mt-1 text-xl font-bold text-ink">{site.name}</h2>
-                            <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                        <LinkedPanel key={site.slug} href={`/operations/sites/${site.slug}`}>
+                            <div className="flex items-start justify-between gap-3">
                                 <div>
-                                    <dt className="text-ink/60">Temp</dt>
-                                    <dd className="font-bold">{readingLabel(site, 'temperature')}</dd>
+                                    <p className="text-xs font-bold tracking-wide text-gold uppercase">{site.town}</p>
+                                    <h2 className="mt-1 text-xl font-bold text-ink">{site.name}</h2>
                                 </div>
-                                <div>
-                                    <dt className="text-ink/60">Humidity</dt>
-                                    <dd className="font-bold">{readingLabel(site, 'humidity')}</dd>
-                                </div>
-                                <div>
-                                    <dt className="text-ink/60">Fill</dt>
-                                    <dd className="font-bold">{readingLabel(site, 'fill')}</dd>
-                                </div>
+                                {(site.open_alert_count ?? 0) > 0 ? (
+                                    <span className="rounded-sm bg-crimson/10 px-2 py-0.5 text-xs font-bold text-crimson">
+                                        {site.open_alert_count} open
+                                    </span>
+                                ) : (
+                                    <span className="text-xs text-ink/40">Clear</span>
+                                )}
+                            </div>
+                            <dl className="mt-5 grid grid-cols-3 gap-3 text-sm">
+                                <MetricCell site={site} metric="temperature" label="Temp" />
+                                <MetricCell site={site} metric="humidity" label="Humidity" />
+                                <MetricCell site={site} metric="fill" label="Fill" />
                             </dl>
-                        </Link>
+                        </LinkedPanel>
                     ))}
                 </div>
 
-                <h2 className="mt-12 text-xl font-bold text-ink">Alerts</h2>
-                <div className="mt-4">
+                <h2 className="mt-12 text-lg font-bold text-ink">Recent alerts</h2>
+                <div className="mt-3">
                     <AlertList alerts={alerts} />
                 </div>
             </div>

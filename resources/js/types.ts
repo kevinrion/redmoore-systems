@@ -23,6 +23,7 @@ export type SiteSummary = {
     name: string;
     slug: string;
     town: string;
+    open_alert_count?: number;
     devices?: DeviceSummary[];
 };
 

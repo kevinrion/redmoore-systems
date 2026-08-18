@@ -16,6 +16,7 @@ class SiteController extends Controller
     {
         $sites = Site::query()
             ->with(['devices.latestReading'])
+            ->withCount(['alerts as open_alert_count' => fn ($query) => $query->whereNull('acknowledged_at')])
             ->orderBy('town')
             ->get();
 
@@ -34,6 +35,7 @@ class SiteController extends Controller
     public function show(Site $site): Response
     {
         $site->load(['devices.latestReading']);
+        $site->loadCount(['alerts as open_alert_count' => fn ($query) => $query->whereNull('acknowledged_at')]);
 
         $alerts = Alert::query()
             ->whereIn('device_id', $site->devices->pluck('id'))

@@ -21,6 +21,7 @@ class SiteResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'town' => $this->town,
+            'open_alert_count' => (int) ($this->open_alert_count ?? 0),
             'devices' => DeviceResource::collection($this->whenLoaded('devices')),
         ];
     }

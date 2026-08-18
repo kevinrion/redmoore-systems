@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 #[Fillable(['name', 'slug', 'town'])]
 class Site extends Model
@@ -25,5 +26,13 @@ class Site extends Model
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);
+    }
+
+    /**
+     * @return HasManyThrough<Alert, Device, $this>
+     */
+    public function alerts(): HasManyThrough
+    {
+        return $this->hasManyThrough(Alert::class, Device::class);
     }
 }
