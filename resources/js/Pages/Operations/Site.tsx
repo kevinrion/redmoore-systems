@@ -13,11 +13,13 @@ export default function OperationsSite() {
     const alertsQuery = useSiteAlerts(slug);
     const site = siteQuery.data;
     const alerts = alertsQuery.data ?? [];
+    const isLoading =
+        (siteQuery.isPending && !siteQuery.data) || (alertsQuery.isPending && !alertsQuery.data);
 
     useDocumentTitle(site?.name);
 
     return (
-        <QueryStatus isPending={siteQuery.isPending || alertsQuery.isPending} isError={siteQuery.isError || alertsQuery.isError}>
+        <QueryStatus isLoading={isLoading} isError={siteQuery.isError || alertsQuery.isError}>
             {site ? (
                 <div className="mx-auto max-w-6xl px-6 py-10">
                     <PageHeader

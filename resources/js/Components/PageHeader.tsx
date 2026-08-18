@@ -1,5 +1,5 @@
-import { Link } from 'react-router';
 import type { ReactNode } from 'react';
+import PrefetchLink from './PrefetchLink';
 
 type Crumb = {
     label: string;
@@ -26,9 +26,9 @@ export default function PageHeader({
                             <span key={`${crumb.label}-${index}`} className="flex items-center gap-2">
                                 {index > 0 ? <span aria-hidden="true">/</span> : null}
                                 {crumb.href ? (
-                                    <Link to={crumb.href} className="hover:text-crimson">
+                                    <PrefetchLink to={crumb.href} className="hover:text-crimson">
                                         {crumb.label}
-                                    </Link>
+                                    </PrefetchLink>
                                 ) : (
                                     <span className="text-ink/80">{crumb.label}</span>
                                 )}

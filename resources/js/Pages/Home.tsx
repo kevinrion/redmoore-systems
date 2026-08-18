@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import PrefetchLink from '../Components/PrefetchLink';
 import { useDocumentTitle } from '../lib/documentTitle';
 
 export default function Home() {
@@ -17,12 +17,12 @@ export default function Home() {
                             Redmoore helps warehouse teams watch temperature, humidity, and how full a site is — in one
                             place. No extra dashboards. Just the numbers people need on the floor.
                         </p>
-                        <Link
+                        <PrefetchLink
                             to="/operations"
                             className="mt-8 inline-flex rounded-sm bg-crimson px-5 py-2.5 text-sm font-bold text-white hover:bg-crimson-dark"
                         >
                             Open the operations demo
-                        </Link>
+                        </PrefetchLink>
                     </div>
                     <img
                         src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1400&q=80"

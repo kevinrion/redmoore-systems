@@ -30,9 +30,11 @@ export default function OperationsIndex() {
     const sites = sitesQuery.data ?? [];
     const alerts = alertsQuery.data ?? [];
     const openInList = alerts.filter((alert) => alert.is_open).length;
+    const isLoading =
+        (sitesQuery.isPending && !sitesQuery.data) || (alertsQuery.isPending && !alertsQuery.data);
 
     return (
-        <QueryStatus isPending={sitesQuery.isPending || alertsQuery.isPending} isError={sitesQuery.isError || alertsQuery.isError}>
+        <QueryStatus isLoading={isLoading} isError={sitesQuery.isError || alertsQuery.isError}>
             <div className="mx-auto max-w-6xl px-6 py-10">
                 <PageHeader
                     title="Operations"

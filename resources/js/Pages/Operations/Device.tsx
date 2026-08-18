@@ -16,12 +16,14 @@ export default function OperationsDevice() {
     const alerts = alertsQuery.data ?? [];
     const current = device?.latest_reading?.value;
     const warn = current !== undefined && device !== undefined && isOutOfRange(device.metric, current);
+    const isLoading =
+        (deviceQuery.isPending && !deviceQuery.data) || (alertsQuery.isPending && !alertsQuery.data);
 
     useDocumentTitle(device?.name);
 
     return (
         <QueryStatus
-            isPending={deviceQuery.isPending || alertsQuery.isPending}
+            isLoading={isLoading}
             isError={deviceQuery.isError || alertsQuery.isError}
         >
             {device ? (

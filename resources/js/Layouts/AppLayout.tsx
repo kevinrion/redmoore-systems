@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router';
 import DemoControls from '../Components/DemoControls';
+import PrefetchLink from '../Components/PrefetchLink';
 
 export default function AppLayout() {
     const { pathname } = useLocation();
@@ -20,12 +21,12 @@ export default function AppLayout() {
                         >
                             Home
                         </Link>
-                        <Link
+                        <PrefetchLink
                             to="/operations"
                             className={`rounded-sm px-3 py-1.5 ${onOperations ? 'bg-paper font-bold text-crimson' : 'text-ink/70 hover:text-crimson'}`}
                         >
                             Operations
-                        </Link>
+                        </PrefetchLink>
                     </nav>
                 </div>
             </header>
