@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.tsx';
+
+@theme {
+    --font-sans: 'Oxygen', ui-sans-serif, system-ui, sans-serif;
+    --color-crimson: #7d0308;
+    --color-crimson-dark: #96181e;
+    --color-crimson-light: #c45a5f;
+    --color-crimson-mist: #f0c9cb;
+    --color-gold: #e6a54b;
+    --color-paper: #fbfcf7;
+    --color-ink: #1e2014;
+    --color-clear: #3f6f52;
+    --color-clear-mist: #e6f0ea;
+}

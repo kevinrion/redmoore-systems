@@ -1,0 +1,19 @@
+services:
+  pgsql:
+    image: postgres:16-alpine
+    ports:
+      - '${FORWARD_DB_PORT:-5434}:5432'
+    environment:
+      POSTGRES_DB: '${DB_DATABASE:-redmoore}'
+      POSTGRES_USER: '${DB_USERNAME:-redmoore}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - redmoore-pgsql:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-redmoore} -d ${DB_DATABASE:-redmoore}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  redmoore-pgsql:
