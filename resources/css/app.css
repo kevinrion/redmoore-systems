@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.tsx';
+
+@theme {
+    --font-sans: 'Oxygen', ui-sans-serif, system-ui, sans-serif;
+    --color-crimson: #7d0308;
+    --color-crimson-dark: #96181e;
+    --color-gold: #e6a54b;
+    --color-paper: #fbfcf7;
+    --color-ink: #1e2014;
+}
