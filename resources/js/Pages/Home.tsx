@@ -1,11 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
-import AppLayout from '../Layouts/AppLayout';
+import { Link } from 'react-router';
+import { useDocumentTitle } from '../lib/documentTitle';
 
 export default function Home() {
-    return (
-        <AppLayout>
-            <Head title="Home" />
+    useDocumentTitle('Home');
 
+    return (
+        <>
             <section className="border-b border-ink/10 bg-white">
                 <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-20">
                     <div>
@@ -18,7 +18,7 @@ export default function Home() {
                             place. No extra dashboards. Just the numbers people need on the floor.
                         </p>
                         <Link
-                            href="/operations"
+                            to="/operations"
                             className="mt-8 inline-flex rounded-sm bg-crimson px-5 py-2.5 text-sm font-bold text-white hover:bg-crimson-dark"
                         >
                             Open the operations demo
@@ -27,7 +27,10 @@ export default function Home() {
                     <img
                         src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1400&q=80"
                         alt="Pallet racking in a distribution warehouse. Photo by CHUTTERSNAP on Unsplash"
-                        className="h-72 w-full rounded-sm object-cover shadow-sm lg:h-[26rem]"
+                        width={1400}
+                        height={900}
+                        decoding="async"
+                        className="h-72 w-full rounded-sm object-cover lg:h-[26rem]"
                     />
                 </div>
             </section>
@@ -36,7 +39,10 @@ export default function Home() {
                 <img
                     src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=1400&q=80"
                     alt="Loaded pallets inside a logistics warehouse. Photo by CHUTTERSNAP on Unsplash"
-                    className="order-2 h-64 w-full rounded-sm object-cover shadow-sm lg:order-1"
+                    width={1400}
+                    height={900}
+                    decoding="async"
+                    className="order-2 h-64 w-full rounded-sm object-cover lg:order-1"
                 />
                 <div className="order-1 lg:order-2">
                     <h2 className="text-2xl font-bold text-ink">Built for cold stores</h2>
@@ -60,6 +66,6 @@ export default function Home() {
                     </aside>
                 </div>
             </section>
-        </AppLayout>
+        </>
     );
 }

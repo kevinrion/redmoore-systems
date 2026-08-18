@@ -1,28 +1,27 @@
-import { Link, usePage } from '@inertiajs/react';
-import type { PropsWithChildren } from 'react';
+import { Link, Outlet, useLocation } from 'react-router';
 import DemoControls from '../Components/DemoControls';
 
-export default function AppLayout({ children }: PropsWithChildren) {
-    const { url } = usePage();
-    const onOperations = url.startsWith('/operations');
+export default function AppLayout() {
+    const { pathname } = useLocation();
+    const onOperations = pathname.startsWith('/operations');
 
     return (
-        <div className="flex min-h-screen flex-col bg-paper">
-            <header className="sticky top-0 z-10 border-b border-ink/10 bg-white/95 backdrop-blur">
+        <>
+            <header className="border-b border-ink/10 bg-white">
                 <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3">
-                    <Link href="/" className="flex items-center gap-3">
-                        <img src="/brand/logo.svg" alt="" className="h-8 w-8" />
+                    <Link to="/" className="flex items-center gap-3">
+                        <img src="/brand/logo.svg" alt="" width={32} height={32} className="h-8 w-8" />
                         <span className="text-sm font-bold tracking-wide text-crimson">Redmoore Systems</span>
                     </Link>
                     <nav className="flex items-center gap-1 text-sm">
                         <Link
-                            href="/"
-                            className={`rounded-sm px-3 py-1.5 ${url === '/' ? 'bg-paper font-bold text-crimson' : 'text-ink/70 hover:text-crimson'}`}
+                            to="/"
+                            className={`rounded-sm px-3 py-1.5 ${pathname === '/' ? 'bg-paper font-bold text-crimson' : 'text-ink/70 hover:text-crimson'}`}
                         >
                             Home
                         </Link>
                         <Link
-                            href="/operations"
+                            to="/operations"
                             className={`rounded-sm px-3 py-1.5 ${onOperations ? 'bg-paper font-bold text-crimson' : 'text-ink/70 hover:text-crimson'}`}
                         >
                             Operations
@@ -30,7 +29,9 @@ export default function AppLayout({ children }: PropsWithChildren) {
                     </nav>
                 </div>
             </header>
-            <main className="flex-1">{children}</main>
+            <main>
+                <Outlet />
+            </main>
             <footer className="border-t border-ink/10 bg-white">
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-2 px-6 py-4 text-sm">
                     <p className="text-ink/55">Fictional company. Portfolio demo — not a live product.</p>
@@ -40,6 +41,6 @@ export default function AppLayout({ children }: PropsWithChildren) {
                     <DemoControls />
                 </div>
             </footer>
-        </div>
+        </>
     );
 }

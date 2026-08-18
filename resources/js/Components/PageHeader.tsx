@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link } from 'react-router';
 import type { ReactNode } from 'react';
 
 type Crumb = {
@@ -26,7 +26,7 @@ export default function PageHeader({
                             <span key={`${crumb.label}-${index}`} className="flex items-center gap-2">
                                 {index > 0 ? <span aria-hidden="true">/</span> : null}
                                 {crumb.href ? (
-                                    <Link href={crumb.href} className="hover:text-crimson">
+                                    <Link to={crumb.href} className="hover:text-crimson">
                                         {crumb.label}
                                     </Link>
                                 ) : (

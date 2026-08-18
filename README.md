@@ -2,7 +2,7 @@
 
 Public demo of a small warehouse cold-chain console for a fictional IoT company.
 
-The app is a Laravel + Inertia.js + React (TypeScript) monolith. There are no user accounts. Fake data covers five UK logistics sites. The only write is acknowledging an alert.
+The app is a React SPA (React Router + TanStack Query) with a Laravel JSON API and Postgres. There are no user accounts. Fake data covers five UK logistics sites. The only write is acknowledging an alert.
 
 This is a portfolio MVP, not a live product.
 

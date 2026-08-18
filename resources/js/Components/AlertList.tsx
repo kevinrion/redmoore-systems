@@ -1,47 +1,25 @@
 import { useEffect, useState } from 'react';
+import { useAcknowledgeAlert } from '../api/operations';
 import type { AlertSummary } from '../types';
 
+const whenFormatter = new Intl.DateTimeFormat('en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+});
+
 function formatWhen(value: string): string {
-    return new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
-}
-
-function xsrfToken(): string {
-    const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
-
-    return match ? decodeURIComponent(match[1]) : '';
-}
-
-async function acknowledgeAlert(id: number): Promise<AlertSummary> {
-    const response = await fetch(`/operations/alerts/${id}/acknowledge`, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-XSRF-TOKEN': xsrfToken(),
-        },
-        body: '{}',
-    });
-
-    if (!response.ok) {
-        throw new Error('Could not acknowledge alert');
-    }
-
-    return response.json();
+    return whenFormatter.format(new Date(value));
 }
 
 function AlertRow({
     alert,
-    onUpdated,
+    isSaving,
+    onAcknowledge,
 }: {
     alert: AlertSummary;
-    onUpdated: (alert: AlertSummary) => void;
+    isSaving: boolean;
+    onAcknowledge: (id: number, onSaved: () => void) => void;
 }) {
-    const [processing, setProcessing] = useState(false);
     const [showSaved, setShowSaved] = useState(false);
     const [fading, setFading] = useState(false);
 
@@ -50,7 +28,6 @@ function AlertRow({
             return;
         }
 
-        setProcessing(false);
         setShowSaved(false);
         setFading(false);
     }, [alert.is_open]);
@@ -70,9 +47,9 @@ function AlertRow({
     }, [showSaved]);
 
     return (
-        <li className="grid grid-cols-1 items-center gap-3 rounded-sm border border-ink/10 bg-white px-4 py-4 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_9rem]">
+        <li className="grid grid-cols-1 items-center gap-3 rounded-sm border border-ink/10 bg-white px-4 py-4 sm:grid-cols-[5.5rem_minmax(0,1fr)_9rem]">
             <span
-                className={`w-fit rounded-sm px-2 py-0.5 text-xs font-bold tracking-wide uppercase ${
+                className={`w-full rounded-sm px-2 py-0.5 text-center text-xs font-bold tracking-wide uppercase ${
                     alert.is_open ? 'bg-crimson/10 text-crimson' : 'bg-clear-mist text-clear'
                 }`}
             >
@@ -89,19 +66,11 @@ function AlertRow({
                 {alert.is_open ? (
                     <button
                         type="button"
-                        disabled={processing}
-                        onClick={() => {
-                            setProcessing(true);
-                            void acknowledgeAlert(alert.id)
-                                .then((updated) => {
-                                    setShowSaved(true);
-                                    onUpdated(updated);
-                                })
-                                .catch(() => setProcessing(false));
-                        }}
+                        disabled={isSaving}
+                        onClick={() => onAcknowledge(alert.id, () => setShowSaved(true))}
                         className="rounded-sm bg-crimson px-3 py-1.5 text-sm font-bold text-white hover:bg-crimson-dark disabled:opacity-60"
                     >
-                        {processing ? 'Saving…' : 'Acknowledge'}
+                        {isSaving ? 'Saving…' : 'Acknowledge'}
                     </button>
                 ) : showSaved ? (
                     <span
@@ -117,20 +86,10 @@ function AlertRow({
     );
 }
 
-export default function AlertList({
-    alerts,
-    onAcknowledged,
-}: {
-    alerts: AlertSummary[];
-    onAcknowledged?: (alert: AlertSummary) => void;
-}) {
-    const [items, setItems] = useState(alerts);
+export default function AlertList({ alerts }: { alerts: AlertSummary[] }) {
+    const acknowledge = useAcknowledgeAlert();
 
-    useEffect(() => {
-        setItems(alerts);
-    }, [alerts]);
-
-    if (items.length === 0) {
+    if (alerts.length === 0) {
         return (
             <p className="border border-dashed border-ink/15 bg-white px-4 py-8 text-center text-sm text-ink/55">
                 No alerts in this view.
@@ -140,19 +99,13 @@ export default function AlertList({
 
     return (
         <ul className="flex flex-col gap-3">
-            {items.map((alert) => (
+            {alerts.map((alert) => (
                 <AlertRow
                     key={alert.id}
                     alert={alert}
-                    onUpdated={(updated) => {
-                        setItems((current) =>
-                            current.map((item) =>
-                                item.id === updated.id
-                                    ? { ...item, ...updated, device: updated.device ?? item.device }
-                                    : item,
-                            ),
-                        );
-                        onAcknowledged?.(updated);
+                    isSaving={acknowledge.isPending && acknowledge.variables === alert.id}
+                    onAcknowledge={(id, onSaved) => {
+                        acknowledge.mutate(id, { onSuccess: onSaved });
                     }}
                 />
             ))}

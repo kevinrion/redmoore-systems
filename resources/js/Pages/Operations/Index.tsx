@@ -1,16 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
 import AlertList from '../../Components/AlertList';
 import LinkedPanel from '../../Components/LinkedPanel';
 import PageHeader from '../../Components/PageHeader';
-import AppLayout from '../../Layouts/AppLayout';
+import QueryStatus from '../../Components/QueryStatus';
+import { useRecentAlerts, useSites } from '../../api/operations';
+import { useDocumentTitle } from '../../lib/documentTitle';
 import { formatReading, isOutOfRange } from '../../metrics';
-import type { AlertSummary, SiteSummary } from '../../types';
-
-type Props = {
-    sites: SiteSummary[];
-    alerts: AlertSummary[];
-};
+import type { SiteSummary } from '../../types';
 
 function MetricCell({ site, metric, label }: { site: SiteSummary; metric: string; label: string }) {
     const device = site.devices?.find((item) => item.metric === metric);
@@ -27,18 +22,17 @@ function MetricCell({ site, metric, label }: { site: SiteSummary; metric: string
     );
 }
 
-export default function OperationsIndex({ sites, alerts }: Props) {
-    const [localSites, setLocalSites] = useState(sites);
-    const [openInList, setOpenInList] = useState(() => alerts.filter((alert) => alert.is_open).length);
+export default function OperationsIndex() {
+    useDocumentTitle('Operations');
 
-    useEffect(() => {
-        setLocalSites(sites);
-        setOpenInList(alerts.filter((alert) => alert.is_open).length);
-    }, [sites, alerts]);
+    const sitesQuery = useSites();
+    const alertsQuery = useRecentAlerts();
+    const sites = sitesQuery.data ?? [];
+    const alerts = alertsQuery.data ?? [];
+    const openInList = alerts.filter((alert) => alert.is_open).length;
 
     return (
-        <AppLayout>
-            <Head title="Operations" />
+        <QueryStatus isPending={sitesQuery.isPending || alertsQuery.isPending} isError={sitesQuery.isError || alertsQuery.isError}>
             <div className="mx-auto max-w-6xl px-6 py-10">
                 <PageHeader
                     title="Operations"
@@ -51,7 +45,7 @@ export default function OperationsIndex({ sites, alerts }: Props) {
                 />
 
                 <div className="grid gap-4 md:grid-cols-2">
-                    {localSites.map((site) => (
+                    {sites.map((site) => (
                         <LinkedPanel key={site.slug} href={`/operations/sites/${site.slug}`}>
                             <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -77,31 +71,9 @@ export default function OperationsIndex({ sites, alerts }: Props) {
 
                 <h2 className="mt-12 text-lg font-bold text-ink">Recent alerts</h2>
                 <div className="mt-3">
-                    <AlertList
-                        alerts={alerts}
-                        onAcknowledged={(updated) => {
-                            setOpenInList((count) => Math.max(0, count - 1));
-
-                            const slug = updated.device?.site_slug;
-
-                            if (!slug) {
-                                return;
-                            }
-
-                            setLocalSites((current) =>
-                                current.map((site) =>
-                                    site.slug === slug
-                                        ? {
-                                              ...site,
-                                              open_alert_count: Math.max(0, (site.open_alert_count ?? 0) - 1),
-                                          }
-                                        : site,
-                                ),
-                            );
-                        }}
-                    />
+                    <AlertList alerts={alerts} />
                 </div>
             </div>
-        </AppLayout>
+        </QueryStatus>
     );
 }
