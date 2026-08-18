@@ -38,5 +38,6 @@ export type AlertSummary = {
         name: string;
         metric_label: string;
         site_town: string | null;
+        site_slug: string | null;
     };
 };

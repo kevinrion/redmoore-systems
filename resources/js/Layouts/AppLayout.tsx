@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+import DemoControls from '../Components/DemoControls';
 
 export default function AppLayout({ children }: PropsWithChildren) {
     const { url } = usePage();
@@ -31,8 +32,12 @@ export default function AppLayout({ children }: PropsWithChildren) {
             </header>
             <main className="flex-1">{children}</main>
             <footer className="border-t border-ink/10 bg-white">
-                <div className="mx-auto max-w-6xl px-6 py-5 text-sm text-ink/55">
-                    Fictional company. Portfolio demo — not a live product.
+                <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-2 px-6 py-4 text-sm">
+                    <p className="text-ink/55">Fictional company. Portfolio demo — not a live product.</p>
+                    <span className="mx-4 text-ink/25" aria-hidden="true">
+                        |
+                    </span>
+                    <DemoControls />
                 </div>
             </footer>
         </div>

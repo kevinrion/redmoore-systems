@@ -39,9 +39,10 @@ class OperationsTest extends TestCase
         $site = $this->seedSite();
         $alert = Alert::query()->whereNull('acknowledged_at')->firstOrFail();
 
-        $this->from('/operations')
-            ->post("/operations/alerts/{$alert->id}/acknowledge")
-            ->assertRedirect('/operations');
+        $this->postJson("/operations/alerts/{$alert->id}/acknowledge")
+            ->assertOk()
+            ->assertJsonPath('id', $alert->id)
+            ->assertJsonPath('is_open', false);
 
         $this->assertNotNull($alert->fresh()?->acknowledged_at);
 
@@ -50,6 +51,19 @@ class OperationsTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Operations/Site')
                 ->where('alerts.0.is_open', false));
+    }
+
+    public function test_demo_reset_reopens_all_alerts(): void
+    {
+        $this->seedSite();
+        $alert = Alert::query()->firstOrFail();
+        $alert->update(['acknowledged_at' => now()]);
+
+        $this->from('/operations')
+            ->post('/operations/demo/reset-acknowledgements')
+            ->assertRedirect('/operations');
+
+        $this->assertNull($alert->fresh()?->acknowledged_at);
     }
 
     private function seedSite(): Site

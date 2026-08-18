@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AlertList from '../../Components/AlertList';
 import LinkedPanel from '../../Components/LinkedPanel';
@@ -12,6 +13,12 @@ type Props = {
 };
 
 export default function OperationsSite({ site, alerts }: Props) {
+    const [openCount, setOpenCount] = useState(site.open_alert_count ?? 0);
+
+    useEffect(() => {
+        setOpenCount(site.open_alert_count ?? 0);
+    }, [site.open_alert_count]);
+
     return (
         <AppLayout>
             <Head title={site.name} />
@@ -24,8 +31,8 @@ export default function OperationsSite({ site, alerts }: Props) {
                     title={site.name}
                     description={`${site.town} cold store. Open a metric to see the last seven days.`}
                     aside={
-                        (site.open_alert_count ?? 0) > 0 ? (
-                            <p className="text-sm font-bold text-crimson">{site.open_alert_count} open alerts</p>
+                        openCount > 0 ? (
+                            <p className="text-sm font-bold text-crimson">{openCount} open alerts</p>
                         ) : null
                     }
                 />
@@ -53,7 +60,10 @@ export default function OperationsSite({ site, alerts }: Props) {
 
                 <h2 className="mt-12 text-lg font-bold text-ink">Alerts</h2>
                 <div className="mt-3">
-                    <AlertList alerts={alerts} />
+                    <AlertList
+                        alerts={alerts}
+                        onAcknowledged={() => setOpenCount((count) => Math.max(0, count - 1))}
+                    />
                 </div>
             </div>
         </AppLayout>

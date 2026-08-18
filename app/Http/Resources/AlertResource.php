@@ -29,6 +29,9 @@ class AlertResource extends JsonResource
                 'site_town' => $this->device->relationLoaded('site')
                     ? $this->device->site->town
                     : null,
+                'site_slug' => $this->device->relationLoaded('site')
+                    ? $this->device->site->slug
+                    : null,
             ]),
         ];
     }

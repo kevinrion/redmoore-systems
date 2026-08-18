@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import AlertList from '../../Components/AlertList';
 import LinkedPanel from '../../Components/LinkedPanel';
@@ -27,7 +28,13 @@ function MetricCell({ site, metric, label }: { site: SiteSummary; metric: string
 }
 
 export default function OperationsIndex({ sites, alerts }: Props) {
-    const openCount = alerts.filter((alert) => alert.is_open).length;
+    const [localSites, setLocalSites] = useState(sites);
+    const [openInList, setOpenInList] = useState(() => alerts.filter((alert) => alert.is_open).length);
+
+    useEffect(() => {
+        setLocalSites(sites);
+        setOpenInList(alerts.filter((alert) => alert.is_open).length);
+    }, [sites, alerts]);
 
     return (
         <AppLayout>
@@ -38,13 +45,13 @@ export default function OperationsIndex({ sites, alerts }: Props) {
                     description="Five UK sites. Temperature, humidity, and fill level. Acknowledging an alert writes to the database."
                     aside={
                         <p className="rounded-sm bg-white px-3 py-2 text-sm text-ink/70 ring-1 ring-ink/10">
-                            <span className="font-bold text-crimson">{openCount}</span> open in this list
+                            <span className="font-bold text-crimson">{openInList}</span> open in this list
                         </p>
                     }
                 />
 
                 <div className="grid gap-4 md:grid-cols-2">
-                    {sites.map((site) => (
+                    {localSites.map((site) => (
                         <LinkedPanel key={site.slug} href={`/operations/sites/${site.slug}`}>
                             <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -70,7 +77,29 @@ export default function OperationsIndex({ sites, alerts }: Props) {
 
                 <h2 className="mt-12 text-lg font-bold text-ink">Recent alerts</h2>
                 <div className="mt-3">
-                    <AlertList alerts={alerts} />
+                    <AlertList
+                        alerts={alerts}
+                        onAcknowledged={(updated) => {
+                            setOpenInList((count) => Math.max(0, count - 1));
+
+                            const slug = updated.device?.site_slug;
+
+                            if (!slug) {
+                                return;
+                            }
+
+                            setLocalSites((current) =>
+                                current.map((site) =>
+                                    site.slug === slug
+                                        ? {
+                                              ...site,
+                                              open_alert_count: Math.max(0, (site.open_alert_count ?? 0) - 1),
+                                          }
+                                        : site,
+                                ),
+                            );
+                        }}
+                    />
                 </div>
             </div>
         </AppLayout>
